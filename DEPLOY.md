@@ -1,4 +1,4 @@
-# Come mettere Alan Render online (guida passo-passo)
+# Come mettere Kurt Render online (guida passo-passo)
 
 Non serve saper programmare. Segui i passi in ordine. Ti serve solo un
 account **GitHub** (gratis) e un account **Render** (gratis).
@@ -8,7 +8,7 @@ account **GitHub** (gratis) e un account **Render** (gratis).
 ## Passo 1 — Metti il codice su GitHub
 
 Render prende il codice da GitHub. Devi caricarci questa cartella
-(`alan-render`).
+(`kurt-dashboard`).
 
 **Modo più semplice (dal sito GitHub, senza comandi):**
 
@@ -24,7 +24,7 @@ Render prende il codice da GitHub. Devi caricarci questa cartella
 
 > Se preferisci i comandi (Git installato):
 > ```bash
-> cd alan-render
+> cd kurt-dashboard
 > git init
 > git add .
 > git commit -m "primo commit"
@@ -44,13 +44,13 @@ Render prende il codice da GitHub. Devi caricarci questa cartella
    - "Blueprint" perché nel progetto c'è già il file `render.yaml` che
      dice a Render come configurarsi da solo.
 3. Se richiesto, autorizza Render ad accedere ai tuoi repo GitHub, poi
-   **seleziona il repo `alan-render`**.
-4. Render legge `render.yaml` e ti mostra il servizio `alan-render` già
+   **seleziona il repo `kurt-render`**.
+4. Render legge `render.yaml` e ti mostra il servizio `kurt-render` già
    pronto (build `npm install`, start `npm start`). Clicca **Apply** /
    **Create**.
 5. Aspetta il primo deploy (qualche minuto). Quando lo stato diventa
    **Live**, in alto trovi l'indirizzo pubblico del sito, tipo
-   `https://alan-render.onrender.com`.
+   `https://kurt-dashboard.onrender.com`.
 
 > **Alternativa senza Blueprint** (se preferisci): New + → **Web Service**
 > → scegli il repo → imposta a mano: Build Command `npm install`,
@@ -60,15 +60,15 @@ Render prende il codice da GitHub. Devi caricarci questa cartella
 
 ---
 
-## Passo 3 — L'immagine di Alan (facoltativo ma consigliato)
+## Passo 3 — L'immagine di Kurt (facoltativo ma consigliato)
 
-Il sito cerca un'immagine in `public/alan.png`. Se non c'è, mostra un
-robot 🤖 al suo posto. Per mettere il poster di Alan:
+Il sito cerca un'immagine in `public/kurt.png`. Se non c'è, mostra un
+robot 🤖 al suo posto. Per mettere il poster di Kurt:
 
-1. Salva l'immagine del robot Alan come file **`alan.png`**.
+1. Salva l'immagine del robot Kurt come file **`kurt.png`**.
 2. Caricala su GitHub dentro la cartella **`public/`** (stesso metodo del
    Passo 1: apri la cartella `public` nel repo → **Add file** →
-   **Upload files** → trascina `alan.png` → Commit).
+   **Upload files** → trascina `kurt.png` → Commit).
 3. Render rifà il deploy da solo e la nuova immagine appare.
 
 ---
