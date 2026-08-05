@@ -1,5 +1,5 @@
 // ============================================================
-// app.js — Frontend Alan Render: macchina a stati + WebSocket
+// app.js — Frontend Kurt Render: macchina a stati + WebSocket
 // ============================================================
 (function () {
     'use strict';
@@ -155,20 +155,4 @@
     document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => show('choice')));
 
     $('#restart').addEventListener('click', () => location.reload());
-
-    // Resend codice via mail (azione .alan <email>)
-    $('#resend-go').addEventListener('click', () => {
-        const em = ($('#email').value || '').trim();
-        const el = $('#resend-msg');
-        if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
-            el.hidden = false; el.classList.remove('ok');
-            el.textContent = 'Inserisci un indirizzo email valido.';
-            return;
-        }
-        $('#resend-go').disabled = true;
-        el.hidden = false; el.classList.remove('ok');
-        el.textContent = 'Invio in corso…';
-        sendWS({ t: 'resend', email: em });
-    });
-    $('#email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#resend-go').click(); });
-})();
+})
