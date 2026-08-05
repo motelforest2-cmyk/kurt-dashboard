@@ -1,0 +1,19 @@
+# Blueprint Render — deploy automatico di Alan Render.
+# Su Render: New → Blueprint → collega il repo che contiene questo file.
+# Render legge questo file e crea il servizio con le impostazioni giuste.
+services:
+  - type: web
+    name: alan-render
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: WORKER_BASE_URL
+        value: https://alan-stats.watusigold99.workers.dev
+      - key: WORKER_BOT_ID
+        value: alan-render-web
+      - key: MAX_SESSIONI
+        value: "15"
+      # WORKER_HMAC_SECRET NON serve: il sito lo ottiene da solo dal Worker.
