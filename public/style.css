@@ -1,0 +1,195 @@
+:root {
+    --bg: #0a0f1c;
+    --bg2: #0f1524;
+    --card: #141b2c;
+    --card2: #1c2536;
+    --line: #2a3550;
+    --text: #eef2fa;
+    --muted: #93a0bd;
+    --gold: #f5c542;
+    --gold2: #d4af37;
+    --gold-deep: #b8860b;
+    --green: #25d366;
+    --green2: #1ea952;
+    --radius: 18px;
+    --shadow: 0 22px 60px rgba(0,0,0,.55);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* Bagliore "server room" bluastro + oro, come il poster */
+.bg-glow {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+        radial-gradient(700px 460px at 12% -8%, rgba(66,120,255,.16), transparent 60%),
+        radial-gradient(760px 520px at 100% 0%, rgba(245,197,66,.12), transparent 55%),
+        radial-gradient(600px 500px at 50% 120%, rgba(37,211,102,.10), transparent 60%);
+}
+
+/* ── Topbar ─────────────────────────────────────────── */
+.topbar {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; max-width: 960px; margin: 0 auto; width: 100%;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo { display: flex; filter: drop-shadow(0 4px 12px rgba(245,197,66,.4)); }
+.brand-text { font-size: 20px; letter-spacing: .3px; }
+.brand-text b { color: var(--gold); }
+.badge {
+    font-size: 11px; color: var(--muted); border: 1px solid var(--line);
+    padding: 5px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .6px;
+}
+
+/* ── Layout ─────────────────────────────────────────── */
+.wrap {
+    position: relative; z-index: 1;
+    flex: 1; width: 100%; max-width: 620px; margin: 0 auto;
+    padding: 14px 18px 40px; display: flex; flex-direction: column;
+}
+
+/* ── Hero con immagine Alan ─────────────────────────── */
+.hero { text-align: center; padding: 10px 6px 22px; }
+.hero-img {
+    width: 150px; height: 150px; margin: 0 auto 18px;
+    border-radius: 24px; overflow: hidden;
+    border: 2px solid var(--gold2);
+    box-shadow: 0 12px 34px rgba(245,197,66,.28);
+    background: linear-gradient(160deg, #1a2236, #0c1220);
+    display: flex; align-items: center; justify-content: center;
+}
+.hero-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero-img.noimg::before { content: "🤖"; font-size: 74px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.5)); }
+.hero h1 { font-size: clamp(27px, 6.4vw, 40px); line-height: 1.08; letter-spacing: -.5px; }
+.hero h1 b { color: var(--gold); }
+.hero .sub { color: var(--muted); margin-top: 12px; font-size: 15px; line-height: 1.55; }
+
+/* ── Card ───────────────────────────────────────────── */
+.card {
+    background: linear-gradient(180deg, var(--card), var(--bg2));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+}
+.card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--green));
+}
+
+/* ── Screens (state machine) ────────────────────────── */
+.screen { display: none; animation: fade .3s ease; }
+.screen.active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── Divider "oppure" ───────────────────────────────── */
+.divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 24px 2px 20px; color: var(--muted); font-size: 12.5px;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: var(--line);
+}
+
+/* ── Resend block (già registrato) ──────────────────── */
+.resend-block { }
+.resend-title { font-size: 14.5px; font-weight: 700; margin-bottom: 6px; }
+.resend-block input { margin-top: 12px; }
+.resend-block .primary { margin-top: 12px; }
+.resend-msg { margin-top: 12px; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.resend-msg.ok { color: var(--green); }
+
+.hint { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 8px; }
+.hint b { color: #e7ecf6; }
+code { background: var(--card2); padding: 2px 7px; border-radius: 6px; font-size: .9em; color: var(--gold); }
+
+input {
+    width: 100%; background: var(--card2); border: 1px solid var(--line);
+    color: var(--text); padding: 14px 16px; border-radius: 12px; font-size: 16px;
+    transition: border-color .15s, box-shadow .15s;
+}
+input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245,197,66,.16); }
+input::placeholder { color: #5c6580; }
+
+/* ── Choices ────────────────────────────────────────── */
+.choose-label { font-weight: 600; margin-bottom: 14px; text-align: center; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.choice {
+    background: var(--card2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 14px; padding: 22px 14px; cursor: pointer; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    transition: transform .12s, border-color .15s, background .15s;
+}
+.choice:hover { transform: translateY(-3px); border-color: var(--gold); background: #212c42; }
+.choice:active { transform: translateY(-1px); }
+.choice-ico { font-size: 34px; }
+.choice-title { font-weight: 700; font-size: 16px; }
+.choice-desc { color: var(--muted); font-size: 12.5px; }
+
+/* ── Buttons ────────────────────────────────────────── */
+.primary {
+    width: 100%; margin-top: 18px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, var(--gold), var(--gold-deep)); color: #201700;
+    padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 800;
+    box-shadow: 0 10px 26px rgba(184,134,11,.4); transition: filter .15s, transform .1s;
+}
+.primary:hover { filter: brightness(1.07); }
+.primary:active { transform: translateY(1px); }
+.primary.ghost { background: transparent; border: 1px solid var(--line); box-shadow: none; color: var(--text); }
+.back {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 14px; margin-bottom: 10px; padding: 4px 0;
+}
+.back:hover { color: var(--text); }
+
+h2 { font-size: 20px; margin-bottom: 6px; }
+
+/* ── QR + pairing code ──────────────────────────────── */
+.qr-box {
+    background: #fff; padding: 14px; border-radius: 14px; width: fit-content;
+    margin: 16px auto; min-height: 180px; display: flex; align-items: center; justify-content: center;
+    border: 3px solid var(--gold2);
+}
+.qr-box img { display: block; width: 260px; height: 260px; max-width: 60vw; }
+.pcode {
+    font-size: clamp(30px, 9vw, 46px); font-weight: 800; letter-spacing: 6px;
+    text-align: center; margin: 20px 0; color: var(--gold);
+    background: var(--card2); border: 1px dashed var(--gold2); border-radius: 14px; padding: 20px 10px;
+    user-select: all;
+}
+
+/* ── Status screen ──────────────────────────────────── */
+[data-screen="status"] { text-align: center; }
+.spinner {
+    width: 46px; height: 46px; border-radius: 50%; margin: 6px auto 16px;
+    border: 4px solid var(--line); border-top-color: var(--gold); animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.status-ico { font-size: 52px; margin: 0 auto 10px; }
+.status-msg { color: var(--muted); font-size: 15px; line-height: 1.55; margin-top: 4px; }
+.is-ok #status-title { color: var(--green); }
+.is-err #status-title { color: var(--gold); }
+
+.foot { text-align: center; color: #5c6580; font-size: 12.5px; margin-top: 22px; }
+
+/* ── Mobile ─────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .card { padding: 18px; border-radius: 16px; }
+    .choices { grid-template-columns: 1fr; }
+    .badge { display: none; }
+    .hero-img { width: 128px; height: 128px; }
+}
