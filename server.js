@@ -54,8 +54,7 @@ wss.on('connection', (ws) => {
             });
         }
 
-    
-    ws.on('close', () => {
+ws.on('close', () => {
         // L'utente ha chiuso la pagina: interrompi il pairing se ancora attivo.
         try { handle?.stop?.(); } catch { /* ignora */ }
     });
@@ -66,4 +65,5 @@ server.listen(PORT, () => {
     console.log(`   Apri http://localhost:${PORT}\n`);
     // Chiede il secret al Worker in anticipo, così è pronto quando serve.
     workerClient.warmup();
-});
+   });
+}
