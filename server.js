@@ -11,7 +11,7 @@ const express = require('express');
 const { WebSocketServer } = require('ws');
 
 const { avviaSessione } = require('./lib/pairingManager');
-const { newSessionId, isEmailValid } = require('./lib/util');
+const { newSessionId } = require('./lib/util');
 const workerClient = require('./lib/workerClient');
 
 const PORT = process.env.PORT || 3000;
