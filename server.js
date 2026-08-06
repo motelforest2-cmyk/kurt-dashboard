@@ -11,7 +11,7 @@ const express = require('express');
 const { WebSocketServer } = require('ws');
 
 const { avviaSessione } = require('./lib/pairingManager');
-const { newSessionId, isEmailValid } = require('./lib/util');
+const { newSessionId } = require('./lib/util');   // email rimossa
 const workerClient = require('./lib/workerClient');
 
 const PORT = process.env.PORT || 3000;
@@ -34,6 +34,39 @@ wss.on('connection', (ws) => {
     const send = (obj) => {
         if (ws.readyState === ws.OPEN) {
             try { ws.send(JSON.stringify(obj)); } catch { /* ignora */ }
+        }
+    };
+
+    send({ t: 'ready' });
+
+    ws.on('message', async (raw) => {
+        let data;
+        try { data = JSON.parse(raw.toString()); } catch { return; }
+
+        if (data.t === 'start') {
+            if (handle) return; // una sola sessione per connessione
+            const method = data.method === 'code' ? 'code' : 'qr';
+            handle = await avviaSessione({
+                sessionId,
+                method,
+                phone: data.phone,
+                send
+            });
+        }
+    });
+
+    ws.on('close', () => {
+        // L'utente ha chiuso la pagina: interrompi il pairing se ancora attivo.
+        try { handle?.stop?.(); } catch { /* ignora */ }
+    });
+});
+
+server.listen(PORT, () => {
+    console.log(`\n☁️  Kurt Render in ascolto sulla porta ${PORT}`);
+    console.log(`   Apri http://localhost:${PORT}\n`);
+    // Chiede il secret al Worker in anticipo, così è pronto quando serve.
+    workerClient.warmup();
+});
         }
     };
 
