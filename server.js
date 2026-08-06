@@ -1,5 +1,5 @@
 // ============================================================
-// server.js — Kurr Render: HTTP statico + WebSocket per il pairing
+// server.js — Kurt Render: HTTP statico + WebSocket per il pairing
 // ============================================================
 'use strict';
 
@@ -20,32 +20,38 @@ const app = express();
 app.disable('x-powered-by');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Endpoint di salute (utile per Render).
+// Endpoint di salute (utile per Render)
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
+
+// WebSocket per QR + CODE
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 wss.on('connection', (ws) => {
     const sessionId = newSessionId();
     let handle = null;
 
-    // Invia un oggetto JSON al client (se il socket è ancora aperto).
+    // Invia JSON al client
     const send = (obj) => {
         if (ws.readyState === ws.OPEN) {
             try { ws.send(JSON.stringify(obj)); } catch { /* ignora */ }
         }
     };
 
+    // Dashboard connessa
     send({ t: 'ready' });
 
     ws.on('message', async (raw) => {
         let data;
         try { data = JSON.parse(raw.toString()); } catch { return; }
 
+        // Avvio pairing
         if (data.t === 'start') {
             if (handle) return; // una sola sessione per connessione
+
             const method = data.method === 'code' ? 'code' : 'qr';
+
             handle = await avviaSessione({
                 sessionId,
                 method,
@@ -53,9 +59,10 @@ wss.on('connection', (ws) => {
                 send
             });
         }
+    });
 
-ws.on('close', () => {
-        // L'utente ha chiuso la pagina: interrompi il pairing se ancora attivo.
+    ws.on('close', () => {
+        // L'utente ha chiuso la pagina → interrompi pairing
         try { handle?.stop?.(); } catch { /* ignora */ }
     });
 });
@@ -63,7 +70,7 @@ ws.on('close', () => {
 server.listen(PORT, () => {
     console.log(`\n☁️  Kurt Render in ascolto sulla porta ${PORT}`);
     console.log(`   Apri http://localhost:${PORT}\n`);
-    // Chiede il secret al Worker in anticipo, così è pronto quando serve.
+
+    // Warmup (compatibile, non obbligatorio)
     workerClient.warmup();
-   });
-}
+});
