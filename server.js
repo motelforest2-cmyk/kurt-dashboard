@@ -1,5 +1,5 @@
 // ============================================================
-// server.js — Alan Render: HTTP statico + WebSocket per il pairing
+// server.js — Kurt Render: HTTP statico + WebSocket per il pairing
 // ============================================================
 'use strict';
 
@@ -53,26 +53,6 @@ wss.on('connection', (ws) => {
                 send
             });
         }
-
-        // Azione "già registrato": chiede a Cloudflare di rimandare il codice
-        // via mail (come .alan <email>). Risposta SEMPRE neutra: non riveliamo
-        // mai se la mail è registrata.
-        if (data.t === 'resend') {
-            const email = (data.email && isEmailValid(data.email)) ? String(data.email).trim() : null;
-            if (!email) {
-                send({ t: 'resend_done', ok: false, msg: 'Indirizzo email non valido.' });
-                return;
-            }
-            try {
-                await workerClient.requestCodeByEmail(email);
-            } catch { /* neutro comunque */ }
-            send({
-                t: 'resend_done',
-                ok: true,
-                msg: 'Se a questa mail è collegato un server in attesa, il codice è in arrivo nella casella.'
-            });
-        }
-    });
 
     ws.on('close', () => {
         // L'utente ha chiuso la pagina: interrompi il pairing se ancora attivo.
