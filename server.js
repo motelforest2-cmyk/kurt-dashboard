@@ -1,28 +1,39 @@
-// ============================================================
-// server.js — Kurt Render: HTTP statico + WebSocket per il pairing
-// ============================================================
 'use strict';
 
-require('dotenv').config();
-
-const http = require('http');
-const path = require('path');
 const express = require('express');
+const http = require('http');
 const { WebSocketServer } = require('ws');
-
-const { avviaSessione } = require('./lib/pairingManager');
-const { newSessionId } = require('./lib/util');   // email rimossa
-const workerClient = require('./lib/workerClient');
-
-const PORT = process.env.PORT || 3000;
+const { avviaSessione } = require('./pairingManager');
+const { newSessionId } = require('./util');
 
 const app = express();
-app.disable('x-powered-by');
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
-// Endpoint di salute (utile per Render).
-app.get('/health', (_req, res) => res.json({ ok: true }));
+// Endpoint di salute
+app.get('/health', (_req, res) => {
+    res.json({ ok: true });
+});
 
+// Avvio pairing via HTTP (QR o CODE)
+app.post('/pairing/start', async (req, res) => {
+    const { phone, method } = req.body;
+    const sessionId = newSessionId();
+
+    try {
+        await avviaSessione({
+            sessionId,
+            phone,
+            method,
+            send: () => {}
+        });
+
+        res.json({ ok: true, sessionId });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Server HTTP + WebSocket
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
@@ -30,13 +41,13 @@ wss.on('connection', (ws) => {
     const sessionId = newSessionId();
     let handle = null;
 
-    // Invia un oggetto JSON al client (se il socket è ancora aperto).
     const send = (obj) => {
         if (ws.readyState === ws.OPEN) {
-            try { ws.send(JSON.stringify(obj)); } catch { /* ignora */ }
+            ws.send(JSON.stringify(obj));
         }
     };
 
+    // Dashboard ready
     send({ t: 'ready' });
 
     ws.on('message', async (raw) => {
@@ -44,8 +55,10 @@ wss.on('connection', (ws) => {
         try { data = JSON.parse(raw.toString()); } catch { return; }
 
         if (data.t === 'start') {
-            if (handle) return; // una sola sessione per connessione
+            if (handle) return;
+
             const method = data.method === 'code' ? 'code' : 'qr';
+
             handle = await avviaSessione({
                 sessionId,
                 method,
@@ -53,17 +66,13 @@ wss.on('connection', (ws) => {
                 send
             });
         }
-    }); // ← CHIUSURA MANCANTE (ORA CORRETTA)
+    });
 
     ws.on('close', () => {
-        // L'utente ha chiuso la pagina: interrompi il pairing se ancora attivo.
-        try { handle?.stop?.(); } catch { /* ignora */ }
+        try { handle?.stop?.(); } catch {}
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`\n☁️  Kurt Render in ascolto sulla porta ${PORT}`);
-    console.log(`   Apri http://localhost:${PORT}\n`);
-    // Chiede il secret al Worker in anticipo, così è pronto quando serve.
-    workerClient.warmup();
+server.listen(3001, () => {
+    console.log('API WhatsApp Bot attive su porta 3001');
 });
