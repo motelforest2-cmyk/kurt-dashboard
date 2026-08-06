@@ -1,5 +1,5 @@
 // ============================================================
-// server.js — Alan Render: HTTP statico + WebSocket per il pairing
+// server.js — Kurr Render: HTTP statico + WebSocket per il pairing
 // ============================================================
 'use strict';
 
@@ -54,26 +54,7 @@ wss.on('connection', (ws) => {
             });
         }
 
-        // Azione "già registrato": chiede a Cloudflare di rimandare il codice
-        // via mail (come .alan <email>). Risposta SEMPRE neutra: non riveliamo
-        // mai se la mail è registrata.
-        if (data.t === 'resend') {
-            const email = (data.email && isEmailValid(data.email)) ? String(data.email).trim() : null;
-            if (!email) {
-                send({ t: 'resend_done', ok: false, msg: 'Indirizzo email non valido.' });
-                return;
-            }
-            try {
-                await workerClient.requestCodeByEmail(email);
-            } catch { /* neutro comunque */ }
-            send({
-                t: 'resend_done',
-                ok: true,
-                msg: 'Se a questa mail è collegato un server in attesa, il codice è in arrivo nella casella.'
-            });
-        }
-    });
-
+    
     ws.on('close', () => {
         // L'utente ha chiuso la pagina: interrompi il pairing se ancora attivo.
         try { handle?.stop?.(); } catch { /* ignora */ }
@@ -81,7 +62,7 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`\n☁️  Alan Render in ascolto sulla porta ${PORT}`);
+    console.log(`\n☁️  Kurt Render in ascolto sulla porta ${PORT}`);
     console.log(`   Apri http://localhost:${PORT}\n`);
     // Chiede il secret al Worker in anticipo, così è pronto quando serve.
     workerClient.warmup();
