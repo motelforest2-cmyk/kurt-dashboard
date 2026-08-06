@@ -66,6 +66,4 @@ wss.on('connection', (ws) => {
 server.listen(PORT, () => {
     console.log(`\n☁️  Kurt Render in ascolto sulla porta ${PORT}`);
     console.log(`   Apri http://localhost:${PORT}\n`);
-    // Chiede il secret al Worker in anticipo, così è pronto quando serve.
-    workerClient.warmup();
 });
