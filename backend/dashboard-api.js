@@ -107,6 +107,6 @@ app.post("/api/send-creds-private", async (req, res) => {
 // -----------------------------
 // 7️⃣ AVVIO SERVER
 // -----------------------------
-app.listen(3002, () => {
-    console.log("Dashboard API attiva su porta 3002");
+app.listen(3001, () => {
+    console.log("Dashboard API attiva su porta 3001");
 });
