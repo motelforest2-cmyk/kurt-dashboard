@@ -50,7 +50,7 @@ app.post("/api/send", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": 9f3b1c2e7a4d9b8c6f1e3a7d2c9f4b1
+        "x-api-key": "9f3b1c2e7a4d9b8c6f1e3a7d2c9f4b1"
       },
       body: JSON.stringify({ botNumber, to, text })
     })
