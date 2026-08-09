@@ -1,119 +1,112 @@
-// dashboard-api.js
-import express from "express"
-import fetch from "node-fetch"
-import fs from "fs"
+import express from "express";
+import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
+import { useMultiFileAuthState } from "@whiskeysockets/baileys";
 
-// CONFIGURAZIONE
-const VPS_URL = "http://216.40.79.16"     // ← METTI IP PUBBLICO DEL VPS
-const API_KEY = "9f3b1c2e7a4d9b8c6f1e3a7d2c9f4b1" // stessa API key del VPS
+const app = express();
+app.use(express.json());
 
-// LOG FILE
-const LOG_FILE = "./dashboard-log.json"
+let PHONE = null;
+let auth = null;
 
-// Funzione log
-function logEvent(event, data) {
-  const entry = {
-    timestamp: new Date().toISOString(),
-    event,
-    data
-  }
+// -----------------------------
+// 1️⃣ SET NUMBER
+// -----------------------------
+app.post("/api/set-number", (req, res) => {
+    const { phone } = req.body;
 
-  let logs = []
-  if (fs.existsSync(LOG_FILE)) {
-    logs = JSON.parse(fs.readFileSync(LOG_FILE, "utf8"))
-  }
+    if (!phone || !/^[0-9]{8,15}$/.test(phone)) {
+        return res.json({ ok: false, error: "Numero non valido" });
+    }
 
-  logs.push(entry)
-  fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2))
-}
+    PHONE = phone;
 
-// EXPRESS
-const app = express()
-app.use(express.json())
+    // Decidi se QR o pairing
+    const mode = phone.startsWith("39") ? "qr" : "pairing";
 
-// HEALTHCHECK
-app.get("/health", (req, res) => {
-  res.json({ ok: true, service: "dashboard-api" })
-})
+    res.json({ ok: true, mode });
+});
 
-// ─────────────────────────────────────────────
-// DASHBOARD → VPS → BOT
-// invia messaggi WhatsApp
-// ─────────────────────────────────────────────
-app.post("/api/send", async (req, res) => {
-  try {
-    const { botNumber, to, text } = req.body
+// -----------------------------
+// 2️⃣ GET NUMBER
+// -----------------------------
+app.get("/api/get-number", (req, res) => {
+    res.json({ phone: PHONE });
+});
 
-    logEvent("dashboard_send", { botNumber, to, text })
+// -----------------------------
+// 3️⃣ GENERA QR
+// -----------------------------
+app.get("/api/qr", async (req, res) => {
+    const { state, saveCreds } = await useMultiFileAuthState("./auth");
+    auth = { state, saveCreds };
 
-    const response = await fetch(`${VPS_URL}/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": "9f3b1c2e7a4d9b8c6f1e3a7d2c9f4b1"
-      },
-      body: JSON.stringify({ botNumber, to, text })
-    })
+    // Baileys genera QR automaticamente
+    res.setHeader("Content-Type", "image/png");
+    res.end(Buffer.from("QR_PLACEHOLDER"));
+});
 
-    const data = await response.json()
-    return res.json({ ok: true, vpsResponse: data })
-  } catch (err) {
-    logEvent("dashboard_send_error", err.message)
-    return res.status(500).json({ ok: false, error: err.message })
-  }
-})
+// -----------------------------
+// 4️⃣ PAIRING CODE
+// -----------------------------
+app.post("/api/pairing", async (req, res) => {
+    const { code } = req.body;
+    if (!code) return res.json({ ok: false, error: "Codice mancante" });
 
-// ─────────────────────────────────────────────
-// VPS → DASHBOARD
-// eventi del bot (installazioni, pairing, errori)
-// ─────────────────────────────────────────────
-app.post("/api/events", async (req, res) => {
-  try {
-    const { event, botNumber, serverId, whatsapp, message } = req.body
+    res.json({ ok: true });
+});
 
-    logEvent("vps_event", req.body)
-
-    // Qui puoi aggiornare il database della dashboard
-    // oppure inviare notifiche in tempo reale al frontend
-
-    return res.json({ ok: true })
-  } catch (err) {
-    logEvent("vps_event_error", err.message)
-    return res.status(500).json({ ok: false, error: err.message })
-  }
-})
-
-// ─────────────────────────────────────────────
-// DASHBOARD → VPS
-// installazione manuale Wispbyte
-// ─────────────────────────────────────────────
+// -----------------------------
+// 5️⃣ INSTALLAZIONE AUTOMATICA
+// -----------------------------
 app.post("/api/install", async (req, res) => {
-  try {
-    const { serverId, botNumber, whatsapp } = req.body
+    const { serverId } = req.body;
 
-    logEvent("dashboard_install", { serverId, botNumber, whatsapp })
+    if (!serverId) {
+        return res.json({ ok: false, error: "ID server mancante" });
+    }
 
-    const response = await fetch(`${VPS_URL}/install`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": "9f3b1c2e7a4d9b8c6f1e3a7d2c9f4b1"
-      },
-      body: JSON.stringify({ serverId, number: botNumber, whatsapp })
-    })
+    try {
+        await fetch("https://216.40.79.16/install", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ serverId })
+        });
 
-    const data = await response.json()
-    return res.json({ ok: true, vpsResponse: data })
-  } catch (err) {
-    logEvent("dashboard_install_error", err.message)
-    return res.status(500).json({ ok: false, error: err.message })
-  }
-})
+        res.json({ ok: true });
+    } catch (err) {
+        res.json({ ok: false, error: err.message });
+    }
+});
 
-// ─────────────────────────────────────────────
-// AVVIO SERVER
-// ─────────────────────────────────────────────
-const PORT = process.env.PORT || 3000
-app.listen(PORT, () => {
-  console.log(`[DASHBOARD-API] Server attivo su porta ${PORT}`)
-})
+// -----------------------------
+// 6️⃣ INVIO PRIVATO CREDS.JSON AL CLIENTE
+// -----------------------------
+app.post("/api/send-creds-private", async (req, res) => {
+    try {
+        const credsPath = path.join("./auth", "creds.json");
+
+        if (!fs.existsSync(credsPath)) {
+            return res.json({ ok: false, error: "creds.json non trovato" });
+        }
+
+        const creds = JSON.parse(fs.readFileSync(credsPath));
+
+        // Qui invii i creds al cliente
+        // Puoi usare email, Telegram, Discord, ecc.
+        // Esempio placeholder:
+        console.log("Invio privato creds.json al cliente:", creds);
+
+        res.json({ ok: true });
+    } catch (err) {
+        res.json({ ok: false, error: err.message });
+    }
+});
+
+// -----------------------------
+// 7️⃣ AVVIO SERVER
+// -----------------------------
+app.listen(3000, () => {
+    console.log("Dashboard API attiva su porta 3000");
+});
