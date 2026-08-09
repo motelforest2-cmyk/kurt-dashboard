@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Inserisci Numero WhatsApp</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Collega il tuo numero WhatsApp</h1>
+  <p>Inserisci il numero senza il simbolo +</p>
+
+  <input id="phone" type="text" placeholder="Es: 393331234567">
+  <button onclick="sendNumber()">Continua</button>
+
+  <p id="result"></p>
+</div>
+
+<script>
+async function sendNumber() {
+  const phone = document.getElementById("phone").value.trim();
+
+  if (!/^[0-9]{8,15}$/.test(phone)) {
+    document.getElementById("result").innerText = "Numero non valido.";
+    return;
+  }
+
+  const res = await fetch("/api/set-number", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone })
+  });
+
+  const data = await res.json();
+
+  if (data.ok) {
+    window.location.href = data.mode === "qr" ? "/qr.html" : "/pairing.html";
+  } else {
+    document.getElementById("result").innerText = "Errore: " + data.error;
+  }
+}
+</script>
+
+</body>
+</html>
