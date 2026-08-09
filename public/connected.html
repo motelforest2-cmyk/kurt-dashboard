@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Bot Collegato</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Bot collegato con successo!</h1>
+  <p>Vuoi procedere con l’installazione automatica?</p>
+
+  <div class="buttons">
+    <button onclick="goInstall()">Sì, procedi</button>
+    <button onclick="sendCreds()">No, invia creds.json</button>
+  </div>
+</div>
+
+<script>
+function goInstall() {
+  window.location.href = "/install.html";
+}
+
+async function sendCreds() {
+  const res = await fetch("/api/send-creds", { method: "POST" });
+  const data = await res.json();
+  alert(data.ok ? "Creds inviati!" : "Errore: " + data.error);
+}
+</script>
+
+</body>
+</html>
