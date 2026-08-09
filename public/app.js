@@ -86,9 +86,7 @@
     const TERMINALI_ERR = ['error', 'expired'];
 
     function onStatus(d) {
-        // Stati che hanno una schermata dedicata (QR/codice) restano lì.
         if (d.state === 'waiting_scan' || d.state === 'waiting_code_input') {
-            // aggiorna solo l'eventuale hint già presente
             return;
         }
 
@@ -108,8 +106,6 @@
             return;
         }
 
-        // Stati intermedi (creating, linked, bivio, waiting_abbinamento, delivering)
-        setSpinner(true);
         const titoli = {
             creating: 'Preparazione…',
             linked: 'Collegato ✓',
@@ -155,4 +151,43 @@
     document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => show('choice')));
 
     $('#restart').addEventListener('click', () => location.reload());
-})
+
+})();
+
+// ============================================================
+// 🔥 INTEGRAZIONE RICHIESTA — REINDIRIZZAMENTI AI FILE HTML
+// ============================================================
+
+// Usa QR Code → qr.html
+document.querySelector('[data-method="qr"]').addEventListener('click', () => {
+    window.location.href = "qr.html";
+});
+
+// Usa Codice → pairing.html
+document.querySelector('[data-method="code"]').addEventListener('click', () => {
+    window.location.href = "pairing.html";
+});
+
+// Dopo inserimento numero → number.html
+const phoneGo = document.getElementById("phone-go");
+if (phoneGo) {
+    phoneGo.addEventListener("click", () => {
+        window.location.href = "number.html";
+    });
+}
+
+// Quando il bot risulta collegato → connected.html
+const statusIco = document.getElementById("status-ico");
+if (statusIco) {
+    statusIco.addEventListener("click", () => {
+        window.location.href = "connected.html";
+    });
+}
+
+// Installazione automatica → install.html
+const installBtn = document.getElementById("install-btn");
+if (installBtn) {
+    installBtn.addEventListener("click", () => {
+        window.location.href = "install.html";
+    });
+}
