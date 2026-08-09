@@ -59,7 +59,7 @@ app.post("/api/send", async (req, res) => {
     return res.json({ ok: true, vpsResponse: data })
   } catch (err) {
     logEvent("dashboard_send_error", err.message)
-    return res.status(500).jso"n({ ok: false, error: err.message })
+    return res.status(500).json({ ok: false, error: err.message })
   }
 })
 
