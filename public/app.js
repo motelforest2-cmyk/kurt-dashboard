@@ -1,5 +1,5 @@
 // ============================================================
-// app.js — Frontend Alan Render: macchina a stati + WebSocket
+// app.js — Frontend Kurt Render: macchina a stati + WebSocket
 // ============================================================
 (function () {
     'use strict';
@@ -86,9 +86,7 @@
     const TERMINALI_ERR = ['error', 'expired'];
 
     function onStatus(d) {
-        // Stati che hanno una schermata dedicata (QR/codice) restano lì.
         if (d.state === 'waiting_scan' || d.state === 'waiting_code_input') {
-            // aggiorna solo l'eventuale hint già presente
             return;
         }
 
@@ -108,8 +106,6 @@
             return;
         }
 
-        // Stati intermedi (creating, linked, bivio, waiting_abbinamento, delivering)
-        setSpinner(true);
         const titoli = {
             creating: 'Preparazione…',
             linked: 'Collegato ✓',
@@ -140,11 +136,19 @@
     document.querySelectorAll('.choice').forEach((btn) => {
         btn.addEventListener('click', () => {
             const method = btn.dataset.method;
-            if (method === 'qr') start('qr');
-            else show('phone');
+
+            // 🔥 AGGIUNTA: QR CHIEDE NUMERO PRIMA
+            if (method === 'qr') {
+                show('phone-qr');
+                return;
+            }
+
+            // pairing code normale
+            show('phone');
         });
     });
 
+    // pairing code
     $('#phone-go').addEventListener('click', () => {
         const phone = ($('#phone').value || '').replace(/\D/g, '');
         if (phone.length < 8) { $('#phone').focus(); return; }
@@ -152,11 +156,19 @@
     });
     $('#phone').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#phone-go').click(); });
 
+    // 🔥 AGGIUNTA: QR → inserimento numero
+    $('#phone-qr-go').addEventListener('click', () => {
+        const phone = ($('#phone-qr').value || '').replace(/\D/g, '');
+        if (phone.length < 8) { $('#phone-qr').focus(); return; }
+        start('qr', phone);
+    });
+    $('#phone-qr').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#phone-qr-go').click(); });
+
     document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => show('choice')));
 
     $('#restart').addEventListener('click', () => location.reload());
 
-    // Resend codice via mail (azione .alan <email>)
+    // Resend codice via mail
     $('#resend-go').addEventListener('click', () => {
         const em = ($('#email').value || '').trim();
         const el = $('#resend-msg');
@@ -171,4 +183,5 @@
         sendWS({ t: 'resend', email: em });
     });
     $('#email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#resend-go').click(); });
+
 })();
