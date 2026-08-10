@@ -1,19 +1,17 @@
-# Blueprint Render — deploy automatico di Kurt Render.
-# Su Render: New → Blueprint → collega il repo che contiene questo file.
-# Render legge questo file e crea il servizio con le impostazioni giuste.
 services:
   - type: web
-    name: kurt-render
+    name: kurt-dashboard
     runtime: node
     plan: free
     buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /health
+
     envVars:
-      - key: WORKER_BASE_URL
-        value: https://alan-stats.watusigold99.workers.dev
-      - key: WORKER_BOT_ID
-        value: kurt-render-web
-      - key: MAX_SESSIONI
-        value: "15"
-      # WORKER_HMAC_SECRET NON serve: il sito lo ottiene da solo dal Worker.
+      - key: VPS_INSTALL_URL
+        value: https://216.40.79.16:3005/install
+
+      - key: VPS_STATUS_URL
+        value: https://216.40.79.16:3005/status
+
+      - key: VPS_SEND_CREDS_URL
+        value: https://216.40.79.16:3005/send-creds
