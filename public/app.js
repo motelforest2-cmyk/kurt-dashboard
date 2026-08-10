@@ -184,4 +184,102 @@
     });
     $('#email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#resend-go').click(); });
 
+    // ============================================================
+// KURT FLOW — stato interno
+// ============================================================
+let kurtReady = false;      // bot collegato
+let kurtAuto = false;       // cliente ha detto .kurt si
+let kurtAsked = false;      // messaggio iniziale inviato
+
+// ============================================================
+// Hook su onStatus — rileva collegamento bot
+// ============================================================
+const oldOnStatus_Kurt = onStatus;
+onStatus = function(d) {
+    oldOnStatus_Kurt(d);
+
+    // Quando il bot è collegato
+    if (d.state === 'linked') {
+        kurtReady = true;
+
+        // Evita doppio invio
+        if (!kurtAsked) {
+            kurtAsked = true;
+
+            // 🔥 Manda in privato la procedura Kurt
+            sendWS({
+                t: 'msg',
+                text: "Il tuo bot è collegato!\n\nVuoi installazione automatica?\n\nRispondi:\n.kurt si\n.kurt no"
+            });
+
+            setSpinner(false, "🤖");
+            setStatus("Bot collegato!", "Procedura inviata su WhatsApp", "ok");
+        }
+    }
+};
+
+// ============================================================
+// Ricezione messaggi dal cliente (via backend → WebSocket)
+// ============================================================
+document.addEventListener("kurtMessage", (ev) => {
+    const text = ev.detail.toLowerCase();
+
+    // --- Cliente vuole installazione automatica ---
+    if (text === ".kurt si") {
+        kurtAuto = true;
+
+        sendWS({
+            t: "msg",
+            text: "Perfetto! Inviami l'ID server Wispbyte (formato: #A12F9XQ3)"
+        });
+
+        setStatus("Installazione automatica", "In attesa dell'ID server…");
+        return;
+    }
+
+    // --- Cliente NON vuole installazione automatica ---
+    if (text === ".kurt no") {
+        kurtAuto = false;
+
+        sendWS({ t: "send_creds" });
+
+        setStatus("Invio credenziali…", "Sto inviando il file al cliente…");
+        return;
+    }
+
+    // --- Cliente invia ID server Wispbyte (alfanumerico) ---
+    if (text.startsWith("#")) {
+
+        // ACCETTA SOLO SE PRIMA HA DETTO .kurt si
+        if (!kurtAuto) {
+            sendWS({
+                t: "msg",
+                text: "Per usare l'installazione automatica devi prima rispondere: .kurt si"
+            });
+            return;
+        }
+
+        // ID alfanumerico valido: # + lettere/numeri
+        const serverId = text.slice(1).trim(); // rimuove solo il #
+
+        if (!/^[a-z0-9]+$/i.test(serverId)) {
+            sendWS({
+                t: "msg",
+                text: "ID non valido. Usa solo lettere e numeri dopo il simbolo #"
+            });
+            return;
+        }
+
+        // 🔥 Avvia installazione automatica
+        sendWS({
+            t: "install",
+            serverId
+        });
+
+        setStatus("Installazione…", "Sto avviando l’installazione automatica…");
+        return;
+    }
+});
+
+
 })();
