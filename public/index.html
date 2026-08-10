@@ -69,6 +69,18 @@
                 <button class="primary" id="phone-go">Genera codice</button>
             </div>
 
+            
+            <!-- STEP 1b — inserimento numero (metodo QR) -->
+            <div class="screen" data-screen="phone-qr">
+                <button class="back" data-back>‹ indietro</button>
+                <h2>Il tuo numero WhatsApp</h2>
+                <p class="hint">Formato internazionale, <b>senza +</b>, senza spazi o trattini. Es: <code>39333xxxxxxx</code></p>
+                <input type="tel" id="phone-qr" inputmode="numeric" placeholder="39333xxxxxxx" autocomplete="tel" />
+                <button class="primary" id="phone-qr-go">Genera QR Code</button>
+            </div>
+
+
+            
             <!-- STEP 2 — QR -->
             <div class="screen" data-screen="qr">
                 <h2>Inquadra il QR</h2>
